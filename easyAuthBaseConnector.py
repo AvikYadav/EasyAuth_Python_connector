@@ -139,24 +139,24 @@ class LoginConnector:
 
 
 # ── Example usage ─────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    api = "Example-api"
-    TOKEN = "Example-token"
-    connector = LoginConnector(
-        username     = "dummy",
-        service_name = "new_ser",
-        api_key = api
-    )
-
-    # Send some user data
-    send_result = connector.send_or_update_user_data(TOKEN, {"msg": "hello from backend"})
-    print("Send result:", send_result)
-
-    # Retrieve user data back
-    user_data = connector.get_user_data(TOKEN)
-    print("User data:", user_data)
-
-    # verify user login
-    login_verify = connector.verify_user_login(TOKEN)
-    print("Verification:", login_verify)
+#
+# if __name__ == "__main__":
+#     api = "Example-api"
+#     TOKEN = "Example-token"
+#     connector = LoginConnector(
+#         username     = "example_user",
+#         service_name = "example_service",
+#         api_key = api
+#     )
+#
+#     # Send some user data
+#     send_result = connector.send_or_update_user_data(TOKEN, {"msg": "hello from backend"})
+#     print("Send result:", send_result)
+#
+#     # Retrieve user data back
+#     user_data = connector.get_user_data(TOKEN)
+#     print("User data:", user_data)
+#
+#     # verify user login
+#     login_verify = connector.verify_user_login(TOKEN)
+#     print("Verification:", login_verify)
