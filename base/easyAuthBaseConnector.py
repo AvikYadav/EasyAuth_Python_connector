@@ -1,6 +1,6 @@
 import requests
 
-import encryption
+import base.encryption
 class LoginConnector:
     """
     Client connector for interacting with the auth service.
@@ -129,7 +129,7 @@ class LoginConnector:
 
 
     def decrypt_token(self,token):
-        token_decrypted = encryption.decrypt_message(token,self.api_key)
+        token_decrypted = encryption.decrypt_message(token, self.api_key)
         return token_decrypted
 
 

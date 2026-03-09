@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, jsonify, redirect, make_response
-from easyAuthBaseConnector import LoginConnector
+from base.easyAuthBaseConnector import LoginConnector
 
 
 # ── Initialise your connector once ────────────────────────────────────────────

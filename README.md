@@ -1,191 +1,149 @@
-# ⚡ EasyAuth Flask SDK
+# ⚡ EasyAuth SDK
+
+### *auth made so eassyy* 
 
 **One line to protect a route. One line to get user data. That's the whole integration.**
 
-🌐 [easy-auth.dev](https://easy-auth.dev) &nbsp;|&nbsp; 📦 [AvikYadav/EasyAuth](https://github.com/AvikYadav/EasyAuth)
+🌐 [easy-auth.dev](https://easy-auth.dev) &nbsp;|&nbsp; 📦 [EasyAuth Server](https://github.com/AvikYadav/EasyAuth) &nbsp;|&nbsp; 📖 [Full Docs & Self-Hosting](https://github.com/AvikYadav/EasyAuth#readme)
 
 ---
 
-## Quickstart
-
-```bash
-pip install -r requirements.txt
-```
-
-Drop `easyauth_flask.py`, `easyAuthBaseConnector.py`, and `encryption.py` into your project, fill in your credentials from your [EasyAuth dashboard](https://easy-auth.dev), and import:
+You already have an app. Here's the entire auth layer:
 
 ```python
-from easyauth_flask import login_required, login_required_redirect, fetch_user_data
-```
-
-**That's the entire setup.** Now protect any route in one line:
-
-```python
+# Flask
 @app.route("/dashboard")
-@login_required
+@login_required                          # ← done
 def dashboard(token):
     return "You're in."
 ```
 
----
-
-You already have a Flask app. EasyAuth slots into it with almost zero code change — fill in your credentials once, drop a decorator on your routes, and auth is done.
-
 ```python
-# Before EasyAuth
-@app.route("/dashboard")
-def dashboard():
-    ...
-
-# After EasyAuth — that's the entire change
-@app.route("/dashboard")
-@login_required
-def dashboard(token):
-    ...
+# FastAPI
+@app.get("/dashboard")
+async def dashboard(token: str = Depends(login_required)):   # ← done
+    return {"status": "in"}
 ```
 
-No sessions. No middleware. No JWT libraries. No passport strategies. One decorator.
+```python
+# Django
+@easyauth_login_required                 # ← done
+def dashboard(request, token):
+    return JsonResponse({"status": "in"})
+```
+
+No sessions. No JWT setup. No middleware. One line.
 
 ---
 
-## Setup — fill in three fields, never think about it again
+## Setup
 
-Open `easyauth_flask.py` and replace these three values with what's on your EasyAuth dashboard:
+Drop the files into your project, open the SDK file for your framework, and fill in three fields:
 
 ```python
 connector = LoginConnector(
-    username     = "your_username",      # ← your EasyAuth username
-    service_name = "your_service_name",  # ← your registered service
-    api_key      = "your_api_key",       # ← shown once on service creation
+    username     = "your_username",
+    service_name = "your_service_name",
+    api_key      = "your_api_key",       # ← from your EasyAuth dashboard
 )
 ```
 
-Then import at the top of your Flask app:
+**That's the entire setup.** Now import into your app:
 
 ```python
-from easyauth_flask import login_required, login_required_redirect, fetch_user_data
-```
-
-**That's the entire setup.** Every route in your app can now be auth-protected.
-
----
-
-## 1 line to protect a route
-
-```python
-@app.route("/dashboard")
-@login_required                          # ← this is the 1 line
-def dashboard(token):
-    return "You're in."
-```
-
-Unauthenticated users get a `401`. Authenticated users get through. The `token` is injected automatically — you don't fetch it, decode it, or verify it yourself.
-
----
-
-## 1 line to get user data
-
-```python
-@app.route("/profile")
-@fetch_user_data                         # ← this is the 1 line
-def profile(username, user_data, token):
-    return jsonify({"hello": username, "your_data": user_data})
-```
-
-`username`, `user_data`, and `token` all arrive as arguments. No API calls in your code. No token parsing. Just use them.
-
----
-
-## Prefer a redirect over a 401?
-
-```python
-@app.route("/settings")
-@login_required_redirect(redirect_url="/login")   # ← same idea, redirects instead
-def settings(token):
-    return render_template("settings.html")
-```
-
----
-
-## Tokens manage themselves
-
-The first time a user hits your app, EasyAuth sends their token in the URL. After that, the SDK handles everything silently:
-
-```
-First visit   →  ?token=... arrives from EasyAuth  →  saved to cookie automatically
-Every visit after  →  cookie is used  →  no token in URL needed
-User logs out or token expires  →  401 / redirect
-```
-
-You never write a single line of cookie or session code.
-
----
-
-## Write user data in one call
-
-```python
-from easyauth_flask import connector
-
-connector.send_or_update_user_data(token, {
-    "plan": "pro",
-    "onboarded": True,
-    "last_page": "/dashboard",
-})
-```
-
-Anything JSON-serializable. It's stored against the user on EasyAuth's side and comes back in `user_data` on every `@fetch_user_data` request.
-
----
-
-## A full app, for reference
-
-```python
-from flask import Flask, jsonify, render_template
+# Flask
 from easyauth_flask import login_required, login_required_redirect, fetch_user_data, connector
+```
 
-app = Flask(__name__)
+```python
+# FastAPI
+from fastapi import Depends
+from easyauth_fastapi import login_required, make_login_required_redirect, fetch_user_data, UserData, connector
+```
 
+```python
+# Django
+from easyauth_django import (
+    login_required as easyauth_login_required,
+    login_required_redirect as easyauth_login_required_redirect,
+    fetch_user_data,
+    connector,
+    # class-based views
+    LoginRequiredMixin, LoginRequiredRedirectMixin, FetchUserDataMixin,
+)
+```
 
-@app.route("/")
-def index():
-    return render_template("index.html")   # public, no auth
+Every route in your app can now be protected.
 
+---
 
-@app.route("/dashboard")
-@login_required_redirect(redirect_url="/login")
+## Protect a route
+
+```python
+@login_required
 def dashboard(token):
-    return render_template("dashboard.html")
+    ...
+```
 
+Unauthenticated → `401`. Authenticated → gets through. Token injected automatically.
 
-@app.route("/profile")
+---
+
+## Get user data
+
+```python
 @fetch_user_data
 def profile(username, user_data, token):
-    return jsonify({"username": username, "data": user_data})
-
-
-@app.route("/save-preferences")
-@login_required
-def save_preferences(token):
-    connector.send_or_update_user_data(token, {"theme": "dark"})
-    return jsonify({"status": "saved"})
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return jsonify({"hello": username, "data": user_data})
 ```
 
-Three decorators, one connector call. That's the entire auth layer of this app.
+`username`, `user_data`, and `token` — all injected. No API calls, no parsing, just use them.
 
 ---
 
-## Three decorators, one table
+## Redirect instead of 401?
 
-| Decorator | What it does | Injects |
-|---|---|---|
-| `@login_required` | Blocks unauthenticated requests → `401` | `token` |
-| `@login_required_redirect` | Blocks unauthenticated requests → redirect | `token` |
-| `@fetch_user_data` | Blocks + fetches user data in one shot | `username, user_data, token` |
+```python
+@login_required_redirect(redirect_url="/login")
+def dashboard(token):
+    ...
+```
+
+Same thing, just sends the user to your login page instead.
 
 ---
 
-*EasyAuth Flask SDK — auth that gets out of your way.*
+## Tokens? Handled.
+
+```
+First visit        →  token arrives in URL  →  saved to cookie automatically
+Every visit after  →  cookie used silently  →  nothing to do
+Token expires      →  401 or redirect       →  user logs in again
+```
+
+You never touch a cookie or a session.
+
+---
+
+## Write user data
+
+```python
+connector.send_or_update_user_data(token, {"plan": "pro", "onboarded": True})
+```
+
+One call. Comes back in `user_data` on every `@fetch_user_data` request.
+
+---
+
+> ⚠️ **Django note:** Django ships its own `login_required`. Always import with an alias:
+> `from easyauth_django import login_required as easyauth_login_required`
+
+---
+
+## Want to know more?
+
+The [EasyAuth server repo](https://github.com/AvikYadav/EasyAuth) has the full picture — how the auth flow works, security details, self-hosting guide, and API reference if you want to build your own integration.
+
+---
+
+*auth made so eassyy ⚡*

@@ -13,19 +13,19 @@ The decorators in `easyauth_flask.py` ( covered in README.md ) cover most use ca
 Every decorator in `easyauth_flask.py` uses a single shared instance of this class internally. When you import `connector` directly, you're getting that same instance.
 
 ```python
-from easyauth_flask import connector
+from Flask.easyauth_flask import connector
 ```
 
 Or instantiate your own:
 
 ```python
-from easyAuthBaseConnector import LoginConnector
+from base.easyAuthBaseConnector import LoginConnector
 
 connector = LoginConnector(
-    username     = "your_username",
-    service_name = "your_service_name",
-    api_key      = "your_api_key",
-    base_url     = "https://easy-auth.dev",
+    username="your_username",
+    service_name="your_service_name",
+    api_key="your_api_key",
+    base_url="https://easy-auth.dev",
 )
 ```
 
@@ -249,14 +249,14 @@ raw_jwt = connector.decrypt_token(token)
 
 ```python
 from flask import Flask, request, jsonify
-from easyAuthBaseConnector import LoginConnector
+from base.easyAuthBaseConnector import LoginConnector
 
 app = Flask(__name__)
 
 connector = LoginConnector(
-    username     = "your_username",
-    service_name = "your_service_name",
-    api_key      = "your_api_key",
+    username="your_username",
+    service_name="your_service_name",
+    api_key="your_api_key",
 )
 
 
@@ -272,15 +272,15 @@ def callback():
         return jsonify({"error": "Invalid token"}), 401
 
     # Fetch full data
-    result    = connector.get_user_data(token)
-    username  = result["username"]
+    result = connector.get_user_data(token)
+    username = result["username"]
     user_data = result["data"] or {}
 
     # First time user — write initial data
     if not user_data.get("onboarded"):
         connector.send_or_update_user_data(token, {
             "onboarded": True,
-            "plan":      "free",
+            "plan": "free",
         })
 
     return jsonify({"welcome": username})
