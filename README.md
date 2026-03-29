@@ -1,4 +1,4 @@
-# easyauth  
+# Easy-Auth 
 auth made so easyyyy
 
 **Full authentication in under a minute. One decorator per route. Nothing else.**
