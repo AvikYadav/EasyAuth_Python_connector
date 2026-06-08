@@ -1,0 +1,16 @@
+{
+  "title": "easy-auth-connector",
+  "tagline": "Auth setup under a minute",
+  "shortSummary": "EasyAuth distributes its connector via the easy-auth-sdk PyPI package. Developers can install the base SDK or framework-specific extras like [easyflask], [easyfastapi], and [easydjango] using pip. Configured globally via environment variables, the package provides simple decorators to seamlessly handle secure routing, token verification, and user data storage in any app.",
+
+  "github": {
+    "repoUrl": "https://github.com/AvikYadav/EasyAuth_Python_connector",
+    "coverImagePath": "images/cover.png",
+    "showcaseImagePath": "images/main-banner.png"
+  },
+
+  "deployment": {
+    "isLive": true,
+    "liveUrl": "https://easy-auth.dev"
+  }
+}
